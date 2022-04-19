@@ -1,5 +1,7 @@
 from termcolor import colored
 from collections import OrderedDict
+import js2py
+from tqdm import tqdm
 
 
 # literature collection
@@ -50,9 +52,16 @@ def make_complete_literals_dict(valid_literals: dict):
 # a function to convert a tens digit to the corresponding literal
 def tens_digit_to_literal(tens_digit: int, complete_literals_dict: dict):
 
+    # save the number
+    tmp_digit = tens_digit
+
     # translate the number
     tens_digit_literal = ''
     for number, literal in list(complete_literals_dict.items())[::-1]:
+
+        # break when remainder is zero
+        if tens_digit == 0:
+            break
 
         # check whether the descending literal fits more than zero times (is part of the complete literal)
         quotient, temp_remainder = divmod(tens_digit, number)
@@ -66,10 +75,7 @@ def tens_digit_to_literal(tens_digit: int, complete_literals_dict: dict):
     return tens_digit_literal
 
 
-def number2literal(input_number: int, valid_literals: dict):
-
-    # make the complete literals dict
-    complete_literals_dict = make_complete_literals_dict(valid_literals)
+def number2literal(input_number: int, complete_literals: dict):
 
     # get the tens digits
     tens_digits = int2digits(input_number)
@@ -79,9 +85,20 @@ def number2literal(input_number: int, valid_literals: dict):
 
     # iterate over every tens digit
     for tens_digit in tens_digits:
-        complete_literal += tens_digit_to_literal(tens_digit, complete_literals_dict)
+        complete_literal += tens_digit_to_literal(tens_digit, complete_literals)
 
     return complete_literal
+
+
+def recreate_js_function(file_path='StolenConverter.js'):
+
+    # get the javascript functions
+    functions = js2py.run_file(file_path)[1]
+
+    def interesting_function(input_number: int):
+        return functions.toRoman(str(input_number))
+
+    return interesting_function
 
 
 def main():
@@ -89,15 +106,41 @@ def main():
     test_cases = {1: 'I', 10: 'X', 7: 'VII', 1999: 'MCMXCIX', 2989: 'MMCMLXXXIX', 2999: 'MMCMXCIX'}
 
     # a dict of valid literals
-    literal_dict = OrderedDict({1: 'I', 5: 'V', 10: 'X', 50: 'L', 100: 'C', 500: 'D', 1000: 'M'})
+    valid_literals = OrderedDict({1: 'I', 5: 'V', 10: 'X', 50: 'L', 100: 'C', 500: 'D', 1000: 'M'})
+
+    # make the complete literals dict
+    complete_literals_dict = make_complete_literals_dict(valid_literals)
 
     # iterate through all test cases
     for number, literal in test_cases.items():
-        res = number2literal(number, literal_dict)
+        res = number2literal(number, complete_literals_dict)
         print(colored(f'{"+" if res == literal else "-"} | For {number=} the result is {res}'
                       f' and it is {"" if res == literal else "not "} correct '
                       f'(expected = {literal}).', "green" if res == literal else "red"))
 
 
+def test_mutliple_cases(end_number=2999):
+
+    # get the baseline function
+    conversion_function = recreate_js_function()
+
+    # a dict of valid literals
+    valid_literals = OrderedDict({1: 'I', 5: 'V', 10: 'X', 50: 'L', 100: 'C', 500: 'D', 1000: 'M'})
+
+    # make the complete literals dict
+    complete_literals_dict = make_complete_literals_dict(valid_literals)
+
+    # check all the numbers
+    correct_guess = 0
+    for number in tqdm(range(1, end_number), desc='Transforming numbers'):
+        estimation = number2literal(number, complete_literals_dict)
+        groundtruth = conversion_function(number)
+        correct_guess += int(estimation == groundtruth)
+
+    # print the results
+    print(f'{correct_guess}/{end_number-1} were translated correctly ({correct_guess/(end_number-1):0.2f}).')
+
+
 if __name__ == '__main__':
-    main()
+    # main()
+    test_mutliple_cases(1500)
