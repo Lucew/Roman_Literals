@@ -1,4 +1,4 @@
-from SortingDict import SortingDict
+from RomanLiterals.SortingDict import SortingDict
 
 
 # literature collection

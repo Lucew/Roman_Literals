@@ -1,16 +1,17 @@
-from RomanLiterals import make_complete_literals_dict, number2literal, to_literal
-from RomanLiteralsJs import get_literals_js_function
+from RomanLiterals.Converter import make_complete_literals_dict, number2literal, to_literal
+from RomanLiterals.JsConverter import get_literals_js_function
+from RomanLiterals.SortingDict import SortingDict
 import time
 from termcolor import colored
 from tqdm import tqdm
-from SortingDict import SortingDict
 import pytest
 
 
 def test_invalid_number():
-    with pytest.raises(ValueError):
-        pytest.raises(to_literal(-1), ValueError)
-        to_literal(3500)
+    with pytest.raises(ValueError, match="invalid literal for "):
+        to_literal(-1)
+    with pytest.raises(ValueError, match="Something went wrong with the conversion of input"):
+        to_literal(5000)
 
 
 def test_several_user_inputs():

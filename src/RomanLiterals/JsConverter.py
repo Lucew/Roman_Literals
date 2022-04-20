@@ -1,11 +1,14 @@
 import json
-
 import js2py
 from tqdm import tqdm
 import os
 
 
-def recreate_js_function(file_path='StolenConverter.js'):
+def recreate_js_function(file_path=None):
+
+    # create file path
+    if file_path is None:
+        file_path = os.path.join(os.path.split(__file__)[0], 'StolenConverter.js')
 
     # get the javascript functions
     functions = js2py.run_file(file_path)[1]
@@ -16,7 +19,12 @@ def recreate_js_function(file_path='StolenConverter.js'):
     return interesting_function
 
 
-def make_literal_dict(file_path='literals.json'):
+def make_literal_dict(file_path=None):
+
+    # create file path
+    if file_path is None:
+        file_path = os.path.join(os.path.split(__file__)[0], 'literals.json')
+
     # get the json function
     conversion_function = recreate_js_function()
 
@@ -32,7 +40,11 @@ def make_literal_dict(file_path='literals.json'):
         f.write(json.dumps(literals_dict))
 
 
-def get_literal_dict(file_path='literals.json', fresh=False):
+def get_literal_dict(file_path=None, fresh=False):
+
+    # create file path
+    if file_path is None:
+        file_path = os.path.join(os.path.split(__file__)[0], 'literals.json')
 
     # create new json if fresh is wished
     if fresh or not os.path.isfile(file_path):
