@@ -1,8 +1,5 @@
-from termcolor import colored
-import js2py
-from tqdm import tqdm
 from SortingDict import SortingDict
-import time
+
 
 # literature collection
 """
@@ -82,59 +79,6 @@ def number2literal(input_number: int, complete_literals: dict):
         complete_literal += tens_digit_to_literal(tens_digit, complete_literals)
 
     return complete_literal
-
-
-def recreate_js_function(file_path='StolenConverter.js'):
-
-    # get the javascript functions
-    functions = js2py.run_file(file_path)[1]
-
-    def interesting_function(input_number: int):
-        return functions.toRoman(str(input_number))
-
-    return interesting_function
-
-
-def test_given_cases():
-    # a list for the test cases
-    test_cases = {1: 'I', 10: 'X', 7: 'VII', 1999: 'MCMXCIX', 2989: 'MMCMLXXXIX', 2999: 'MMCMXCIX'}
-
-    # a dict of valid literals
-    valid_literals = SortingDict({1: 'I', 5: 'V', 10: 'X', 50: 'L', 100: 'C', 500: 'D', 1000: 'M'})
-
-    # make the complete literals dict
-    complete_literals_dict = make_complete_literals_dict(valid_literals)
-
-    # iterate through all test cases
-    for number, literal in test_cases.items():
-        res = number2literal(number, complete_literals_dict)
-        print(colored(f'{"+" if res == literal else "-"} | For {number=} the result is {res}'
-                      f' and it is {"" if res == literal else "not "} correct '
-                      f'(expected = {literal}).', "green" if res == literal else "red"))
-
-
-def test_multiple_cases(end_number=2999):
-
-    # get the baseline function
-    conversion_function = recreate_js_function()
-
-    # a dict of valid literals
-    valid_literals = SortingDict({1: 'I', 5: 'V', 10: 'X', 50: 'L', 100: 'C', 500: 'D', 1000: 'M'})
-
-    # make the complete literals dict
-    complete_literals_dict = make_complete_literals_dict(valid_literals)
-
-    # check all the numbers
-    correct_guess = 0
-    timed = time.perf_counter()
-    for number in tqdm(range(1, end_number), desc='Transforming numbers'):
-        estimation = number2literal(number, complete_literals_dict)
-        groundtruth = conversion_function(number)
-        correct_guess += int(estimation == groundtruth)
-    timed = time.perf_counter() - timed
-    # print the results
-    print(f'{correct_guess}/{end_number-1} were translated correctly in {timed:0.4} s'
-          f' ({correct_guess/(end_number-1)*100:0.2f} %).')
 
 
 def to_literal(number):
