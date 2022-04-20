@@ -92,5 +92,5 @@ def to_literal(number):
 
 
 if __name__ == '__main__':
-    # this code won't be tested since its is just demonstration
+    # this code won't be tested since its is just demonstration (not necessary)
     print(to_literal(199))
