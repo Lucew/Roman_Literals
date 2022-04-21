@@ -28,7 +28,7 @@ def test_several_user_inputs():
 
 def test_several_numbers(end_number=2999):
 
-    # get the baseline function
+    # get the baseline function for the conversion
     conversion_function = get_literals_js_function()
 
     # a dict of valid literals
