@@ -107,8 +107,11 @@ class AccessCounterDict(dict):
             if k not in super().keys():
                 self.counter[k] = 0
 
+    def get_without_counter(self, key):
+        return super().__getitem__(key)
+
     def get_access_counter(self, key):
         return self.counter[key]
 
     def max(self):
-        return self.counter[self.max_key]
+        return self. max_key, self.counter[self.max_key]
