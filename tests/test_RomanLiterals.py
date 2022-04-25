@@ -1,4 +1,4 @@
-from RomanLiterals.Converter import make_complete_literals_dict, number2literal, to_literal
+from RomanLiterals.Converter import make_complete_literals_dict, number2literal, to_literal, from_literal
 from RomanLiterals.JsConverter import get_literals_js_function
 from RomanLiterals.SortingDict import SortingDict
 import time
@@ -7,7 +7,7 @@ from tqdm import tqdm
 import pytest
 
 
-def test_invalid_number():
+def test_invalid_numbers():
     with pytest.raises(ValueError, match="invalid literal for "):
         to_literal(-1)
     with pytest.raises(ValueError, match="Something went wrong with the conversion of input"):
@@ -44,13 +44,63 @@ def test_several_numbers(end_number=2999):
         estimation = number2literal(number, complete_literals_dict)
         groundtruth = conversion_function(number)
         correct_guess += int(estimation == groundtruth)
+
+    # get the time
     timed = time.perf_counter() - timed
+
     # print the results
     print(f'{correct_guess}/{end_number-1} were translated correctly in {timed:0.4} s'
           f' ({correct_guess/(end_number-1)*100:0.2f} %).')
+
+    # raise an error if not all numbers were detected correctly
+    if correct_guess < end_number - 1:
+        raise ValueError('Conversion from number to literal was not done correctly in every case!')
+
+
+def test_several_literals(end_number=2999):
+
+    # get the baseline function for the conversion
+    conversion_function = get_literals_js_function()
+
+    # check all the numbers
+    correct_guess = 0
+    timed = time.perf_counter()
+    for number in tqdm(range(1, end_number), desc='Transforming numbers'):
+
+        # get the correct literal
+        literal = conversion_function(number)
+
+        # translate the literal with our function
+        estimated_number = from_literal(literal)
+
+        correct_guess += int(estimated_number == number)
+
+    # get the time
+    timed = time.perf_counter() - timed
+
+    # print the results
+    print(f'{correct_guess}/{end_number - 1} were translated correctly in {timed:0.4} s'
+          f' ({correct_guess / (end_number - 1) * 100:0.2f} %).')
+
+    # raise an error if not all numbers were detected correctly
+    if correct_guess < end_number - 1:
+        raise ValueError('Conversion from literal to number was not done correctly in every case!')
+
+
+def test_invalid_literals():
+    with pytest.raises(ValueError, match="as the symbols are not in order!"):
+        from_literal('MIIX')
+    with pytest.raises(ValueError, match="can not subtract over tens digit border!"):
+        from_literal('MIMIX')
+    with pytest.raises(ValueError, match="input as this number can be simplified to"):
+        from_literal('MDM')
+    with pytest.raises(ValueError, match="input as it contains symbols more than three times"):
+        from_literal('MMMMM')
 
 
 if __name__ == "__main__":
     test_several_user_inputs()
     test_several_numbers(3000)
-    test_invalid_number()
+    test_invalid_numbers()
+    test_several_literals(3000)
+    test_invalid_literals()
