@@ -4,7 +4,7 @@ from tqdm import tqdm
 import os
 
 
-def recreate_js_function(file_path=None):
+def recreate_js_function(file_path=None, to_roman=True):
 
     # create file path
     if file_path is None:
@@ -13,8 +13,12 @@ def recreate_js_function(file_path=None):
     # get the javascript functions
     functions = js2py.run_file(file_path)[1]
 
-    def interesting_function(input_number: int):
-        return functions.toRoman(str(input_number))
+    if to_roman:
+        def interesting_function(input_number: int):
+            return functions.toRoman(str(input_number))
+    else:
+        def interesting_function(input_number: int):
+            return functions.fromRoman(str(input_number))
 
     return interesting_function
 
@@ -29,7 +33,7 @@ def make_literal_dict(file_path=None):
     conversion_function = recreate_js_function()
 
     # make dict
-    literals_dict = {key: "" for key in range(1,3000)}
+    literals_dict = {key: "" for key in range(1, 3000)}
 
     # create all the literals
     for number in tqdm(range(1, 3000), desc='Creating the literals with js'):
@@ -65,7 +69,7 @@ def get_literals_js_function():
     # get the dict
     literals_dict = get_literal_dict()
 
-    def temp_fnc(number):
+    def temp_fnc(number: int):
 
         # get the literals from the dict
         literal = literals_dict.get(number)
@@ -79,5 +83,29 @@ def get_literals_js_function():
     return temp_fnc
 
 
+def get_number_js_function():
+
+    # get the dict
+    literals_dict = get_literal_dict()
+
+    # reverse the dict
+    numbers_dict = {value: key for key, value in literals_dict.items()}
+
+    def temp_fnc(literal: str):
+
+        # get the literals from the dict
+        number = numbers_dict.get(literal)
+
+        # raise ValueError if not found
+        if number is None:
+            raise ValueError('Number could not be created by JS function.')
+
+        return number
+
+    return temp_fnc
+
+
+
 if __name__ == '__main__':
     print(get_literal_dict())
+    print(get_number_js_function()('MMI'))
