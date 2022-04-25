@@ -157,7 +157,7 @@ def from_literal(literal: str):
 
     # check if we accessed the dict too often
     key, number = valid_literals.max()
-    if number > 3:
+    if number > 4:
         raise ValueError(f'[{literal=}] is not a valid input as it contains symbols more than three times'
                          f' ({number}x{key}).')
 
